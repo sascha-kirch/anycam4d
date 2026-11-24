@@ -4,8 +4,8 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/arXiv-coming%20soon-b31b1b?logo=arxiv&logoColor=white" alt="arXiv: coming soon">
-  <a href="https://sascha-kirch.github.io/anycam4d/"><img src="https://img.shields.io/badge/Project%20Page-AnyCam4D-FFB03B" alt="Project page"></a>
-  <a href="#citation"><img src="https://img.shields.io/badge/BibTeX-cite-0E1116" alt="BibTeX"></a>
+  <a href="https://sascha-kirch.github.io/anycam4d/"><img src="https://img.shields.io/badge/Project%20Page-AnyCam4D-1f6feb" alt="Project page"></a>
+  <a href="#citation"><img src="https://img.shields.io/badge/BibTeX-cite-2ea44f" alt="BibTeX"></a>
 </p>
 
 <p align="center">
