@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AnyCam4D: Ray-Based 4D Gaussian Rendering for Arbitrary Camera Models</title>
+  <meta name="description" content="AnyCam4D trains native 4D Gaussians on original footage by ray-based rasterization and renders them through any camera model.">
+  <meta property="og:title" content="AnyCam4D: Ray-Based 4D Gaussian Rendering for Arbitrary Camera Models">
+  <meta property="og:description" content="Train through the lens you have. Render through the lens you want.">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="assets/vendor/lato/lato.css">
+  <link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="hero" id="hero">
+  <div class="wall">
+    <video src="media/wall.mp4" autoplay muted loop playsinline preload="auto"></video>
+    <div class="wall-labels" aria-hidden="true"></div>
+    <div class="veil"></div>
+    <div class="hero-title">
+      <div class="mask"><h1 class="wordmark">AnyCam4D</h1></div>
+      <div class="rule"></div>
+      <div class="mask"><p class="subtitle">Ray-Based 4D Gaussian Rendering<br>for Arbitrary Camera Models</p></div>
+    </div>
+  </div>
+  <p class="wall-note">Each tile is one trained 4D Gaussian model. Lens, camera and time change as it plays.</p>
+</header>
+
+<section class="wrap people">
+  <p class="authors">
+    <a href="https://sascha-kirch.github.io/" title="Website">Sascha Kirch<sup>1</sup><i class="badge">web</i></a>
+    <a href="https://www.rafapages.com/" title="Website">Rafael Pagés<sup>2</sup><i class="badge">web</i></a>
+    <a href="https://orcid.org/0000-0002-5409-1521" title="ORCID">Jan Ondřej<sup>2</sup><i class="badge">iD</i></a>
+    <a href="https://orcid.org/0000-0001-8260-4155" title="ORCID">Clara Pérez-Molina<sup>1</sup><i class="badge">iD</i></a>
+    <a href="https://orcid.org/0000-0002-4118-0234" title="ORCID">Sergio Martin<sup>1</sup><i class="badge">iD</i></a>
+  </p>
+  <p class="affil">
+    <span><sup>1</sup>UNED, Universidad Nacional de Educación a Distancia, Madrid</span>
+    <span><sup>2</sup>Volograms, Dublin</span>
+  </p>
+  <nav class="links">
+    <a class="btn is-off" aria-disabled="true">Paper <small>arXiv soon</small></a>
+    <a class="btn" href="#video">Video</a>
+    <a class="btn is-off" aria-disabled="true">Code <small>coming soon</small></a>
+    <a class="btn" href="#bibtex">BibTeX</a>
+  </nav>
+</section>
+
+<main>
+
+<section class="wrap" id="abstract">
+  <h2>Abstract</h2>
+  <div class="prose">
+    <p>Real cameras are not pinholes, yet most dynamic Gaussian splatting assumes they are. Footage is therefore
+      undistorted first, losing field of view or detail, especially with wide-angle and fisheye cameras. Static
+      Gaussian splatting has largely solved this with ray-based rendering, which suits any camera. Native 4D
+      Gaussians, which model motion in space-time, cannot use it directly: each Gaussian's orientation and size
+      cannot be recovered reliably from its covariance.</p>
+    <p>We present AnyCam4D, which trains native 4D Gaussians on original footage by ray-based rasterization,
+      preserving field of view and resolution at about the per-step cost of standard projection. Our key
+      contribution is a numerically stable way to obtain orientation and size: we condition a square root of the 4D
+      covariance. Trained models render through other cameras, with rolling shutter, depth of field or chromatic
+      aberration. With a synthetic 170° fisheye camera, training on original images improves peak signal-to-noise
+      ratio (PSNR) by 3.0–8.1&nbsp;dB. On real footage, AnyCam4D has lower perceptual error than the standard
+      projection adapted to each camera, at comparable PSNR and without camera-specific derivations. With the
+      synthetic camera rotated 60–80° away from the capture rig's view, it leads by 6.2&nbsp;dB against ground
+      truth.</p>
+  </div>
+</section>
+
+<section class="wrap" id="video">
+  <h2>Video</h2>
+  <iframe class="media ratio-16x9" src="https://www.youtube-nocookie.com/embed/d21KtSrRZ6U?rel=0" title="AnyCam4D video"
+    loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen
+    referrerpolicy="strict-origin-when-cross-origin"></iframe>
+</section>
+
+<section class="wrap" id="any-camera">
+  <h2>One Model, Any Camera</h2>
+  <div class="lens">
+    <div class="lens-main">
+      <div class="lens-view">
+        <video class="media" muted loop playsinline preload="auto" disablepictureinpicture data-manual></video>
+        <button class="pill lens-play" type="button" hidden>Play</button>
+      </div>
+      <input type="range" min="0" max="1000" value="0" aria-label="Lens">
+      <div class="ends"><span>first lens</span><span>last lens</span></div>
+    </div>
+    <div class="lens-side">
+      <p class="lead">A trained model renders through lenses it was never trained with. Some scenes open from a pinhole
+        through Brown–Conrady and Kannala–Brandt lenses to a 180° fisheye, one shows a circular fisheye through three
+        projections, and the others bend the image with strong lens distortions. Pick a scene, then drag the slider.</p>
+      <div class="readout"><div><span>lens</span><b class="lens-fov">Pinhole</b></div></div>
+      <div class="chips" role="tablist" aria-label="Scene"></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" id="effects">
+  <h2>Camera Effects</h2>
+  <p class="lead">Because every pixel traces its own ray, a trained model also renders effects that a single
+    projection per image cannot express.</p>
+  <div class="cols3">
+    <article class="effect">
+      <div class="compare" data-compare>
+        <video src="media/rs_global.mp4" muted loop playsinline preload="auto"></video>
+        <video src="media/rs_rolling.mp4" muted loop playsinline preload="auto"></video>
+        <span class="tag left">Global</span><span class="tag right">Rolling</span>
+      </div>
+      <input type="range" min="0" max="1" step="0.001" value="0.5" aria-label="Global or rolling shutter" data-divider>
+      <div class="ends"><span>global shutter</span><span>rolling shutter</span></div>
+      <h3>Rolling shutter</h3>
+      <p class="caption">Each image row is rendered at its own time and camera pose, as a rolling-shutter sensor reads
+        it out.</p>
+    </article>
+    <article class="effect" data-scrub="media/dof/">
+      <img class="media" alt="Depth of field with a moving focus distance">
+      <input type="range" min="0" max="0" value="0" aria-label="Focus distance">
+      <div class="ends"><span>focus far</span><span>focus near</span></div>
+      <h3>Depth of field</h3>
+      <p class="caption">A thin-lens model focuses the render at a chosen depth, through any lens model. Time is
+        frozen while the focus moves.</p>
+    </article>
+    <article class="effect" data-scrub="media/ca/">
+      <img class="media" alt="Chromatic aberration of increasing strength">
+      <span class="tag right ca-val">0.0 %</span>
+      <input type="range" min="0" max="0" value="0" aria-label="Aberration strength">
+      <div class="ends"><span>no aberration</span><span>3 % magnification difference</span></div>
+      <h3>Chromatic aberration</h3>
+      <p class="caption">Each wavelength is rendered through its own lens model, which spreads colour towards the
+        edge of the frame. The strength is exaggerated.</p>
+    </article>
+  </div>
+</section>
+
+<section class="wrap" id="tradeoff">
+  <h2>What Undistortion Costs</h2>
+  <p class="lead">A pinhole image of a fisheye frame cannot keep both its field of view and the resolution at its
+    centre. Undistorting to the full field of view spreads the centre over fewer pixels, and keeping the centre
+    sharp crops the field. AnyCam4D trains on the native frame and keeps both. The coloured bands mark the angle
+    from the optical axis, and the chart shows how many pixels per degree each band receives. With a synthetic
+    170° fisheye camera, training on the original images improves PSNR by 3.0–8.1&nbsp;dB.</p>
+  <div class="tradeoff">
+    <div class="to-view">
+      <img class="media" alt="Fisheye frame and its undistorted versions">
+      <span class="tag left to-state">Native fisheye</span>
+      <button class="pill to-rings" type="button" aria-pressed="true">Hide incidence bands</button>
+    </div>
+    <div class="to-side">
+      <div class="readout">
+        <div><span>field across the image</span><b class="to-field">170°</b></div>
+        <div><span>focal length at the centre</span><b class="to-focal">364 px</b></div>
+      </div>
+      <svg class="to-chart" viewBox="0 0 480 300" role="img" aria-label="Pixels per degree against incidence angle"></svg>
+      <div class="bands">
+        <span><i style="background:#0072B2"></i>0–20°</span><span><i style="background:#56B4E9"></i>20–40°</span>
+        <span><i style="background:#009E73"></i>40–60°</span><span><i style="background:#E69F00"></i>60–85°</span>
+        <em>angle from the optical axis</em>
+      </div>
+    </div>
+    <div class="to-slider">
+      <input type="range" min="-1" max="1" step="0.005" value="0" aria-label="Undistortion">
+      <div class="to-ticks"><span>Keep field of view</span><span>Native</span><span>Keep centre resolution</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" id="method">
+  <h2>How It Works</h2>
+  <p class="lead">A ray-based renderer handles any lens, but it needs each Gaussian's orientation and size. A 4D
+    Gaussian sliced in time does not provide them in a form that survives 32-bit arithmetic. AnyCam4D keeps them by conditioning a square
+    root of the 4D covariance instead of the covariance itself.</p>
+
+  <div class="chapters">
+    <article class="chap">
+      <div class="chap-text">
+        <p class="chap-n">01</p>
+        <h3>What a ray-based renderer needs</h3>
+        <p>Ray-based rendering, as in the 3D Gaussian Unscented Transform (<a href="https://arxiv.org/abs/2412.12507">3DGUT</a>), works with any camera because it
+          never approximates the lens by a straight-line projection. Sigma points along each Gaussian's axes go
+          through the real lens to select the image tiles it covers, and each pixel ray then meets the Gaussian at
+          its densest point. Both steps need the Gaussian's orientation and size, as a square root \(B\) of its
+          covariance. A static 3D Gaussian stores rotation \(R\) and scales \(S\), so \(B = RS\) is at hand.</p>
+        <div class="eq">\[
+          \mathcal{X}_{\pm i} = \mu \pm \sqrt{3}\,[B]_i, \qquad
+          D^2 = \min_{\ell}\,\bigl\lVert B^{-1}(p + \ell d)\bigr\rVert^2 \]</div>
+      </div>
+      <figure class="fig">
+        <svg class="glyph" data-glyph="lens" viewBox="0 0 420 230" role="img"
+          aria-label="Sigma points of a Gaussian mapped through a fisheye lens onto image tiles"></svg>
+        <figcaption>Drag the Gaussian towards the edge of the lens.</figcaption>
+      </figure>
+    </article>
+
+    <article class="chap">
+      <div class="chap-text">
+        <p class="chap-n">02</p>
+        <h3>What a 4D Gaussian provides</h3>
+        <p>A native 4D Gaussian spans space and time. At render time \(\tau\) it is conditioned on \(t = \tau\).
+          Its mean then moves with constant velocity, a temporal gate \(w_t\) fades it in and out, and its 3D
+          covariance is what remains of the 4D one once time is fixed. Conditioning returns this covariance as a
+          matrix, not as a rotation and scales.</p>
+        <div class="eq">\[
+          \begin{aligned}
+          \mu_{3D}(\tau) &= \mu_{xyz} + \Sigma_{xyz,t}\,(\tau - \mu_t)/\sigma_t^2\\
+          \Sigma_{3D} &= \Sigma_{xyz} - \Sigma_{xyz,t}\Sigma_{xyz,t}^\top/\sigma_t^2\\
+          w_t &= \exp\!\bigl(-(\tau-\mu_t)^2/2\sigma_t^2\bigr)
+          \end{aligned}\]</div>
+      </div>
+      <figure class="fig">
+        <svg class="glyph" data-glyph="slice" viewBox="0 0 420 240" role="img"
+          aria-label="A 4D Gaussian sliced at time tau"></svg>
+        <figcaption>Drag across the plot to move \(\tau\).</figcaption>
+      </figure>
+    </article>
+
+    <article class="chap">
+      <div class="chap-text">
+        <p class="chap-n">03</p>
+        <h3>Why the direct route breaks</h3>
+        <p>An eigendecomposition of \(\Sigma_{3D}\) would recover rotation and scales, but its gradient is undefined
+          when two axes are equal, which is how Gaussians start. A Cholesky factor avoids this, yet the covariance
+          is already damaged. For a fast, thin Gaussian, long in space-time but thin at any instant, the subtraction
+          above cancels two nearly equal matrices. Along a thin axis at \(10^{-4}\) of the longest, a variance of
+          \(10^{-8}\) is the difference of two numbers close to one, and 32-bit floating point (fp32) keeps only
+          about seven significant digits. The thin axis is lost to rounding, and its variance can even come out
+          negative.</p>
+        <div class="eq">\[
+          \underbrace{\Sigma_{3D}}_{\sim 10^{-8}} \;=\; \underbrace{\Sigma_{xyz}}_{\sim 1} \;-\;
+          \underbrace{\Sigma_{xyz,t}\Sigma_{xyz,t}^\top/\sigma_t^2}_{\sim 1} \]</div>
+      </div>
+      <figure class="fig" data-sparks="sigma">
+        <svg class="glyph" data-glyph="sparks" viewBox="0 0 420 230" role="img"
+          aria-label="Fast, thin Gaussians whose widths are computed from the covariance in 32-bit floating point"></svg>
+        <input type="range" min="0" max="1000" value="0" aria-label="Thinness">
+        <div class="ends"><span>thin axis 1 : 100</span><span>1 : 1 000 000</span></div>
+        <figcaption>Each spark is a fast, thin Gaussian, drawn at the width fp32 returns relative to its true width.
+          Rounding adds an error of about \(10^{-8}\) to every variance. Once the true variance is smaller, a spark
+          comes out too wide or too thin, or with a negative variance (dashed). Drag to make them thinner.</figcaption>
+      </figure>
+    </article>
+
+    <article class="chap">
+      <div class="chap-text">
+        <p class="chap-n">04</p>
+        <h3>Condition the square root</h3>
+        <p>The 4D Gaussian does store rotation and scales, so a square root of its 4D covariance is at hand,
+          \(M = RS\). Removing the time direction \(\hat m\) from every axis of \(M\) gives a square root \(N\) of
+          exactly the same \(\Sigma_{3D}\), without the subtraction. \(N\) holds axis lengths instead of their
+          squares, so a thin axis at \(10^{-4}\) stays three digits above fp32 rounding.</p>
+        <div class="eq">\[
+          M = \begin{pmatrix} M_{xyz} \\ m^\top \end{pmatrix},\quad
+          N = M_{xyz}\bigl(I - \hat m \hat m^\top\bigr),\quad
+          \Sigma_{3D} = N N^\top \]</div>
+      </div>
+      <figure class="fig" data-sparks="sigma root">
+        <svg class="glyph" data-glyph="sparks" viewBox="0 0 420 230" role="img"
+          aria-label="The same Gaussians computed from the covariance and from its square root"></svg>
+        <input type="range" min="0" max="1000" value="0" aria-label="Thinness">
+        <div class="ends"><span>thin axis 1 : 100</span><span>1 : 1 000 000</span></div>
+        <figcaption>The same sparks, from \(\Sigma_{3D}\) on the left and from \(N\) on the right. \(N\) holds the
+          widths themselves, so rounding stays far below them.</figcaption>
+      </figure>
+    </article>
+
+    <article class="chap">
+      <div class="chap-text">
+        <p class="chap-n">05</p>
+        <h3>One triangular factor, any lens</h3>
+        <p>Whitening a ray applies the inverse of the square root, but \(N\) has three rows and four columns and
+          no inverse. Forming \(NN^\top\) to factor it would bring back the squares that lose thin axes. Instead, a
+          QR decomposition of \(N\), stacked on a small floor \(\sqrt{\varepsilon_c}\,I\), gives a square,
+          triangular \(L\) with \(LL^\top = \Sigma_{3D} + \varepsilon_c I\). Because \(L\) is triangular, its
+          inverse is applied row by row without ever being formed, and it stores six numbers instead of twelve.
+          \(L\) takes the place of rotation and scales: its columns give the sigma points, and it whitens each
+          pixel ray, so the densest point along the ray follows in closed form. In training, non-finite gradients
+          on native lenses fell from 4 of 49 runs to none of 72.</p>
+        <div class="eq">\[
+          \begin{aligned}
+          \begin{pmatrix} N^\top \\ \sqrt{\varepsilon_c}\, I \end{pmatrix} &= QU, \qquad L = U^\top\\
+          \ell^\star &= \max\Bigl(0,\, -\tfrac{(L^{-1}d)^\top L^{-1}p}{\lVert L^{-1}d\rVert^2}\Bigr)\\
+          D^2 &= \bigl\lVert L^{-1}(p + \ell^\star d)\bigr\rVert^2
+          \end{aligned}\]</div>
+      </div>
+      <figure class="fig">
+        <svg class="glyph" data-glyph="ray" viewBox="0 0 420 220" role="img"
+          aria-label="A pixel ray through a Gaussian and its densest point"></svg>
+        <figcaption>The densest point \(\ell^\star\) is where the ray touches a contour of the Gaussian (dashed): the
+          closest point after whitening, not the foot of the perpendicular from the mean. Drag to aim the ray.</figcaption>
+      </figure>
+    </article>
+  </div>
+
+  <div class="pipeline">
+    <h3>The full pipeline</h3>
+    <p class="lead">At render time \(\tau\), each 4D Gaussian is conditioned in factored form. Its square root
+      \(N\) gives the 3D Gaussian, and a QR decomposition turns \(N\) into the triangular factor \(L\). The
+      renderer then works in two stages. First, the unscented projection maps the mean and six sigma points, placed at
+      \(\pm\sqrt{3}\) times each column of \(L\), through the camera model and assigns the Gaussian to every tile
+      their bounding box covers. Second, the ray-based rasterizer casts one ray per pixel, whitens it with
+      \(L^{-1}\), and composites each Gaussian with its opacity at the densest point along the ray. Neither stage
+      needs a derivation for a particular camera, so one trained model renders through pinhole, fisheye,
+      orthographic and Kannala–Brandt lenses, and with rolling shutter or depth of field.</p>
+    <figure class="figure"><img src="media/method.png" alt="AnyCam4D pipeline: conditioning, unscented projection and tile assignment, ray-based rasterizer"></figure>
+  </div>
+</section>
+
+</main>
+
+<section class="closing" id="closing">
+  <div class="wall">
+    <video src="media/wall.mp4" muted loop playsinline preload="none"></video>
+    <div class="veil"></div>
+    <div class="hero-title">
+      <h2 class="wordmark">AnyCam4D</h2>
+      <div class="rule"></div>
+      <p class="subtitle">Train through the lens you have.<br>Render through the lens you want.</p>
+      <nav class="links">
+      <a class="btn is-off" aria-disabled="true">Paper <small>arXiv soon</small></a>
+      <a class="btn" href="#video">Video</a>
+      <a class="btn is-off" aria-disabled="true">Code <small>coming soon</small></a>
+      <a class="btn" href="#bibtex">BibTeX</a>
+    </nav>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" id="bibtex">
+  <h2>BibTeX</h2>
+  <div class="bib">
+    <button class="copy" type="button" data-copy="#bib">Copy</button>
+<pre id="bib">@article{kirch2026anycam4d,
+  title   = {AnyCam4D: Ray-Based 4D Gaussian Rendering for Arbitrary Camera Models},
+  author  = {Kirch, Sascha and Pag{\'e}s, Rafael and Ond{\v{r}}ej, Jan and
+             P{\'e}rez-Molina, Clara and Martin, Sergio},
+  journal = {arXiv preprint},
+  year    = {2026}
+}</pre>
+  </div>
+</section>
+
+<footer class="wrap foot">
+  <span>© 2026 The AnyCam4D authors</span>
+  <a href="#hero">Back to top ↑</a>
+</footer>
+
+<script src="assets/vendor/katex/katex.min.js"></script>
+<script src="assets/vendor/katex/auto-render.min.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
