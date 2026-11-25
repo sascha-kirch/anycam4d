@@ -5,6 +5,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/arXiv-coming%20soon-b31b1b?logo=arxiv&logoColor=white" alt="arXiv: coming soon">
   <a href="https://sascha-kirch.github.io/anycam4d/"><img src="https://img.shields.io/badge/Project%20Page-AnyCam4D-1f6feb" alt="Project page"></a>
+  <a href="https://huggingface.co/datasets/sascha-kirch/dynopsis"><img src="https://img.shields.io/badge/Dataset-Dynopsis-ffd21e?logo=huggingface" alt="Dataset"></a>
   <a href="#citation"><img src="https://img.shields.io/badge/BibTeX-cite-2ea44f" alt="BibTeX"></a>
 </p>
 
