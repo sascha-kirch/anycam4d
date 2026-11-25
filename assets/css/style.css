@@ -155,7 +155,7 @@ input[type="range"] { width: 100%; accent-color: var(--a); margin: 10px 0 6px; }
 .fig input[type="range"] { margin: 8px 0 2px; }
 .eq { overflow-x: auto; overflow-y: hidden; font-size: 15px; padding: 4px 0; }
 .eq .katex-display { margin: .4em 0; }
-.glyph { display: block; width: 100%; height: auto; user-select: none; -webkit-user-select: none; cursor: grab; touch-action: pan-y; }
+.glyph { display: block; width: 100%; height: auto; user-select: none; -webkit-user-select: none; cursor: grab; touch-action: none; }
 .glyph:active { cursor: grabbing; }
 .glyph text { font-family: Lato, sans-serif; }
 .nobr { white-space: nowrap; }
@@ -211,15 +211,18 @@ video::-webkit-media-controls, video::-webkit-media-controls-overlay-play-button
   .lens-side { order: -1; }
   .chips { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
+/* Below this width the wall is too short for an overlaid title: title above the wall, veil off. */
+@media (max-width: 900px) {
+  .wall { overflow: visible; aspect-ratio: auto; display: flex; flex-direction: column; }
+  .wall video { aspect-ratio: 1416 / 534; border-radius: 6px; }
+  .veil { display: none; }
+  .hero-title, #hero .hero-title { position: static; order: -1; padding: 8px 0 24px; opacity: 1 !important; }
+  .closing .hero-title { order: 0; padding: 24px 0 0; }
+  .wall-labels { display: none; }
+}
 @media (max-width: 700px) {
   body { font-size: 16px; }
   section.wrap, section.closing { margin-bottom: 112px; }
-  /* The wall is too short for an overlaid title on a phone: title goes below, veil off. */
-  .wall { overflow: visible; aspect-ratio: auto; }
-  .wall video { aspect-ratio: 1416 / 534; border-radius: 6px; }
-  .veil { display: none; }
-  .hero-title { position: static; padding: 24px 0 0; opacity: 1 !important; }
-  .wall-labels { display: none; }
   .readout b { font-size: 32px; }
 }
 @media (prefers-reduced-motion: reduce) {
