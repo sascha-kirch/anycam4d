@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/arXiv-coming%20soon-b31b1b?logo=arxiv&logoColor=white" alt="arXiv: coming soon">
+  <a href="https://arxiv.org/abs/2611.34223"><img src="https://img.shields.io/badge/arXiv-2611.34223-b31b1b?logo=arxiv&logoColor=white" alt="arXiv"></a>
   <a href="https://sascha-kirch.github.io/anycam4d/"><img src="https://img.shields.io/badge/Project%20Page-AnyCam4D-1f6feb" alt="Project page"></a>
   <a href="https://huggingface.co/datasets/sascha-kirch/dynopsis"><img src="https://img.shields.io/badge/Dataset-Dynopsis-ffd21e?logo=huggingface" alt="Dataset"></a>
   <a href="#citation"><img src="https://img.shields.io/badge/BibTeX-cite-2ea44f" alt="BibTeX"></a>
@@ -25,7 +25,9 @@ The code will be released soon.
   title   = {AnyCam4D: Ray-Based 4D Gaussian Rendering for Arbitrary Camera Models},
   author  = {Kirch, Sascha and Pag{\'e}s, Rafael and Ond{\v{r}}ej, Jan and
              P{\'e}rez-Molina, Clara and Martin, Sergio},
-  journal = {arXiv preprint},
+  journal = {arXiv preprint arXiv:2611.34223},
+  eprint  = {2611.34223},
+  archivePrefix = {arXiv},
   year    = {2026}
 }
 ```
