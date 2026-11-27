@@ -1,0 +1,45 @@
+# @package _global_
+# MCMC densification, spatial moves only: dead = base opacity <= min_opacity, noise on means only, temporal
+# parameters inherited from parents. MCMC never prunes; opacity_reg manufactures the dead set it relocates.
+training:
+  accum_renders: 4
+  sampler: temporal_tiled  # uniform overfits DyNeRF
+  mu_t_lr: 1.042e-4  # DyNeRF flame_steak value of the og_4dgs recipe
+  opacity_reg_lambda: 0.002  # L1 on sigmoid(alpha) * w_t(tau)
+  opacity_reg_detach_gate: true  # gradient stops at w_t: pushes opacity only
+  scale_reg_lambda: 0.01
+
+strategy:
+  type: mcmc_spatial
+
+  # Binding population budget: MCMC grows 5% per refine until it reaches this and holds. Keep it fixed
+  # across a densification comparison. Scene-dependent.
+  cap_max: 3_000_000
+
+  # Noise scaler = means lr * noise_lr, so it anneals with the LR schedule (paper value).
+  noise_lr: 5.0e5
+
+  # Absolute steps, validated against training.max_steps.
+  refine_start_iter: 500
+  refine_stop_iter: 22_500    # leaves a quarter of the run to settle at a frozen population
+  noise_injection_stop_iter: 18_000
+  refine_every: 100
+
+  # sigmoid(opacity) <= min_opacity is dead and relocated. Match prune_opa when comparing families.
+  min_opacity: 0.005
+
+  # Children are born at min_opacity * factor. At 1.0 (published) a clamped child is dead again at the
+  # next refine, a feedback loop that grows the dead set.
+  birth_opacity_factor: 4.0
+
+  # Population growth per refine until cap_max (gsplat: 5 %).
+  growth_rate: 0.05
+
+  # Relocated / added copies split the parent's temporal footprint (sigma_t / group size, offsets along the
+  # trajectory) instead of copying it.
+  temporal_partition: true
+
+  # Parent sampling: opacity (gsplat) | motion ((rank of opacity + rank of image gradient) / 2 x (1 + 3 rank of speed)).
+  parent_score: motion
+
+  verbose: false

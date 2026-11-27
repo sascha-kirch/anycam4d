@@ -1,0 +1,7 @@
+# EWA splatting on undistorted pinhole data: the 4DGS baseline (`rendering=anycam4d` turns it into anycam4d.yaml).
+# Densification: `recipe=og_4dgs|mcmc_spatial|default_spatial|null_4dgs`.
+defaults:
+  - base
+  - recipe: og_4dgs
+  - rendering: ewa
+  - _self_

@@ -1,0 +1,77 @@
+# Settings every run shares. A recipe (conf/recipe/) overrides what its densification method needs; a top-level config
+# (anycam4d.yaml, 4dgs.yaml) picks the recipe and the renderer.
+dataset:
+  data_dir: ???  # dataset.data_dir=/path/to/dataset
+  scale_factor: 1  # image downscale at load
+
+model:
+  sh_degree: 3
+  init_opacity: 0.1
+  # -1: initial temporal width of 5 frames (5 / n_frames). Values near 1.0 (the whole sequence) are unstable.
+  temporal_spread_init: -1.0
+  # Bound on |mu_t| beyond the sequence in temporal widths; -1 derives sqrt(-2 ln(prefilter_threshold)),
+  # past which a primitive renders at no timestamp. 0 pins mu_t inside.
+  mu_t_margin_sigmas: -1.0
+  # Spatial PSD floor; sqrt(cov_eps) is the narrowest axis the renderer draws.
+  cov_eps: 1.0e-6
+  # sh4d_additive: direction-independent temporal term | sh4d_multiplicative: published 4DGS basis (1.8x the memory)
+  appearance_model: sh4d_additive
+  n_temporal_freqs: 4  # sh4d_additive only
+  # Primitives with temporal weight below this get zero opacity (0 disables), as in 4DGS.
+  prefilter_threshold: 0.05
+
+training:
+  max_steps: 30_000
+  seed: 42  # vary across replicates; runs are not bit-reproducible
+  batch_size: 1  # cameras per step; -1 infers from the sampler
+  accum_renders: 1  # renders accumulated per optimizer step; effective batch = batch_size * accum_renders
+  # uniform (C=1) | frame_aligned (C>1, one frame's cameras) | temporal_tiled (C=1, accum_renders frames of one camera)
+  sampler: uniform
+
+  # Adam; selective Adam steps only the primitives visible in the batch.
+  selective_adam: true
+  optimizer_eps: 1.0e-15
+  optimizer_betas: [0.9, 0.999]
+
+  # Spatial LRs (gsplat simple_trainer defaults)
+  means_lr: 1.6e-4
+  means_lr_final: 1.6e-6  # exponential decay of means_lr
+  quats_lr: 1.0e-3
+  scales_lr: 5.0e-3
+  opacities_lr: 5.0e-2
+  sh0_lr: 2.5e-3
+  shN_lr: 1.25e-4  # 2.5e-3 / 20
+  mu_t_lr: 1.6e-5
+
+  # Loss weights
+  ssim_lambda: 0.2
+  ssim_start_step: 0
+  mask_bg_alpha_lambda: 0.2
+  scale_reg_lambda: 0.0
+  opacity_reg_lambda: 0.0
+  opacity_reg_detach_gate: false
+
+  # Bilateral grid (only with rendering.post_processor=bilateral_grid)
+  bilagrid_lr: 2.0e-3
+  bilagrid_tv_lambda: 10.0
+
+  # SH curriculum: one degree per interval, spatial degrees first, then temporal.
+  sh_degree_interval: 1000
+
+  # Evaluation
+  eval_every: 1000
+  lpips_net: alex  # alex | vgg | squeeze
+
+  # Logging and checkpoints: best.pt (best eval metric, selected on the held-out split) and last.pt.
+  log_every: 100
+  save_every: 0  # >0 also keeps a step-indexed series
+  save_best: true
+  best_metric: psnr
+  save_images: false
+
+# Live browser viewer during training: viewer.enabled=true.
+viewer:
+  enabled: false
+  port: 8080
+  playback_fps: 30.0
+  update_every_n_steps: 50

@@ -1,0 +1,41 @@
+# @package _global_
+# Published 4DGS densifier and training regime: the paper setting for both renderers. The full-4D split also moves
+# mu_t and the temporal scale. Temporal LR and initial width depend on the sequence; the values below are DyNeRF
+# flame_steak's, `python scripts/og4dgs_regime.py <dataset> --overrides` prints them for any scene.
+model:
+  temporal_spread_init: 0.1417  # published sqrt(span_seconds / 5), as a fraction of the span
+  # The published code does not bound mu_t; a very large margin disables the projection.
+  mu_t_margin_sigmas: 1.0e6
+
+training:
+  accum_renders: 4  # the published batch of 4
+  sampler: temporal_tiled  # uniform overfits DyNeRF
+  mu_t_lr: 1.042e-4  # published means_lr * cameras_extent / span_seconds, in normalized time
+
+strategy:
+  type: og_4dgs
+
+  grow_grad2d: 0.0002  # published value; screen-space basis (pixels converted to NDC)
+  grow_scale3d: 0.01
+  prune_opa: 0.005
+  prune_scale3d: 0.1
+  refine_start_iter: 500
+  refine_stop_iter: 15_000
+  refine_every: 100
+  # Published configs differ per scene: 3000 by default, 10_000 on flame_steak (pass strategy.reset_every).
+  reset_every: 3_000
+
+  # Uncapped, as the published config is (`densify_until_num_points: -1`): a cap would invent a primitive count
+  # the method never had. VRAM is the only ceiling: about 2.35 GB per 1M primitives with sh4d_additive
+  # (89 floats/primitive), 1.8x that with sh4d_multiplicative (161). A run past it fails with OOM rather than
+  # silently training a capped model.
+  cap_max: 0
+
+  # The published densifier reads the screen-space gradient, which only EWA has; the backend-independent paramspace
+  # trigger replaces it for both renderers (strategy.spatial_trigger=screenspace restores it on EWA).
+  spatial_trigger: paramspace
+  grad3d_threshold: 0.0002  # paramspace: |dL/dmu| * camera distance / 2 (3DGRUT, 3DGS value)
+  # The published split has no temporal floor; adding one would make the baseline better than the method.
+  sigma_t_floor: 0.0
+
+  verbose: false

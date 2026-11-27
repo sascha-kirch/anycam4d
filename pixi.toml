@@ -1,0 +1,98 @@
+[workspace]
+name = "anycam4d"
+channels = ["conda-forge", "nvidia"]
+platforms = ["linux-64"]
+
+# Declare a CUDA 12 runtime so pixi provides the ``__cuda`` virtual package and can select the
+# cuda* conda builds (e.g. GPU-enabled pycolmap) even when the driver isn't auto-detected.
+[system-requirements]
+cuda = "12"
+
+[dependencies]
+python = "3.12.*"
+numpy = ">=1.26.1,<2"
+setuptools = "==81.0.0"
+ruff = ">=0.14.10,<0.15"
+jaxtyping = ">=0.3.4,<0.4"
+rich = ">=15,<16"
+scipy = ">=1.17,<2"
+plyfile = ">=0.8.1"
+cuda-toolkit = "12.8.*"
+pip = ">=26,<27"
+ninja = ">=1.13,<2"
+clang-tools = ">=18,<19"
+libxcrypt = ">=4.4.36,<5"
+viser = ">=0.2.23,<0.3"
+pytest = ">=8,<9"
+matplotlib = ">=3.10.9,<4"
+pydantic = ">=2.13.4,<3"
+# CUDA-enabled COLMAP python bindings (conda-forge ships cuda* builds; the PyPI wheels are CPU-only).
+# The cuda build selector gives GPU SIFT/matching; requires a CUDA runtime (cuda-toolkit above).
+pycolmap = { version = ">=3.10,<4", build = "cuda*" }
+huggingface_hub = ">=1.23.0,<2"
+ffmpeg = ">=8.1.2,<9"
+zip = ">=3.0,<4"
+tqdm = ">=4.70.1,<5"
+pillow = ">=12.0.0,<13"
+scikit-image = ">=0.26.0,<0.27"
+
+[pypi-dependencies]
+torch = { version = "==2.10.0", index = "https://download.pytorch.org/whl/cu128" }
+hydra-core = ">=1.3,<2"
+omegaconf = ">=2.3"
+nerfview = { git = "https://github.com/nerfstudio-project/nerfview", rev = "4538024fe0d15fd1a0e4d760f3695fc44ca72787" }
+anycam4d = { path = ".", editable = true }
+imageio = ">=2.34,<3"
+tensorboard = ">=2.16,<3"
+splines = ">=0.3.3,<0.4"
+opencv-python = ">=4.11.0.86, <5"
+torchmetrics = ">=1.4,<2"
+lpips = ">=0.1.4"
+
+[activation.env]
+# CUDA builds (`setup` and the JIT extension) target every GPU visible at build time. To build without a visible GPU
+# or for several GPUs, name the archs: ANYCAM4D_CUDA_ARCH_LIST="8.6" pixi run setup (or "8.0;8.6;8.9;9.0+PTX").
+# Setting TORCH_CUDA_ARCH_LIST here also replaces cuda-nvcc's activation default, which lists archs torch rejects.
+TORCH_CUDA_ARCH_LIST = "${ANYCAM4D_CUDA_ARCH_LIST:-native}"
+# The population and the tile-intersection buffer resize at every refine step; expandable segments let the
+# caching allocator grow blocks in place instead of fragmenting.
+PYTORCH_ALLOC_CONF = "expandable_segments:True"
+LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
+
+[tasks]
+# Print the GPU architectures CUDA builds target; fails with a hint when none can be detected.
+cuda-arch = "python -c \"from anycam4d.cuda_toolchain import cuda_arch_tag; print('CUDA targets:', cuda_arch_tag())\""
+# Build gsplat, fused-ssim and fused-bilagrid against the installed torch (hence --no-build-isolation).
+setup = { depends-on = ["cuda-arch"], cmd = "pip install --no-build-isolation git+https://github.com/nerfstudio-project/gsplat@v1.5.3 git+https://github.com/rahul-goel/fused-ssim@328dc9836f513d00c4b5bc38fe30478b4435cbb5 git+https://github.com/harry7557558/fused-bilagrid@49f0ef06c9f81810fb9b5dd9027cf1844950cc16", env = { NVCC_APPEND_FLAGS = "-w" } }
+train = "python scripts/train.py"
+# Registry-driven, resumable canonical + variant builder; download fetches raw source to the user machine.
+build-variants = "python scripts/prepare_datasets/build_variants.py"
+download = "python scripts/prepare_datasets/download.py"
+# Your own synchronized multi-camera videos -> dataset (COLMAP calibration, ffmpeg extraction).
+prepare-videos = "python scripts/prepare_datasets/from_videos.py"
+# Per-dataset convenience bindings (add --scene / --source-root / --out-root on the CLI).
+build-dynerf = { cmd = "python scripts/prepare_datasets/build_variants.py --registry conf/datasets/dynerf.yaml" }
+build-selfcap = { cmd = "python scripts/prepare_datasets/build_variants.py --registry conf/datasets/selfcap.yaml" }
+build-deepview = { cmd = "python scripts/prepare_datasets/build_variants.py --registry conf/datasets/deepview.yaml" }
+view = "python scripts/view.py"
+eval = "python scripts/eval.py"
+test = "pytest tests/"
+format = "ruff format ."
+check = {cmd = "ruff check --fix -q -e --output-format grouped && ruff check --statistics -q"}
+# ----- CUDA extension tasks -----
+# Trigger JIT compilation (cached per GPU architecture in ~/.cache/torch_extensions/)
+cuda-build = { cmd = "python -c \"from anycam4d.cuda.build import build_cuda_ext; build_cuda_ext(verbose=True); print('CUDA ext built OK')\"", env = { VERBOSE = "1" } }
+# Recompile with debug symbols + line info (enables meaningful compute-sanitizer output)
+cuda-build-debug = { cmd = "python -c \"from anycam4d.cuda.build import build_cuda_ext; build_cuda_ext(verbose=True); print('CUDA ext built (debug) OK')\"", env = { DEBUG = "1", LINE_INFO = "1", VERBOSE = "1" } }
+# Remove cached JIT artifacts (forces full recompilation on next import)
+cuda-clean = { cmd = "python -c \"from anycam4d.cuda_toolchain import clean_cuda_ext; print('cleaned', clean_cuda_ext() or 'nothing')\"" }
+# Full clean + rebuild
+cuda-rebuild = { depends-on = ["cuda-clean", "cuda-build"] }
+# Run tests under compute-sanitizer (memcheck).
+# Build with LINE_INFO=1 first for useful stack traces: pixi run cuda-build-debug
+cuda-sanitizer = { cmd = "compute-sanitizer --tool memcheck --print-limit 20 --leak-check full pytest tests/test_cuda.py -v -s", env = { VERBOSE = "0" } }
+# Format C++/CUDA sources with clang-format (requires clang-format in PATH)
+cuda-format = { cmd = "find anycam4d/cuda/csrc -type f \\( -name '*.cu' -o -name '*.cuh' -o -name '*.cpp' -o -name '*.h' \\) | xargs clang-format -i" }
+
+
+style = [ {task = "format"}, {task = "check"} ]

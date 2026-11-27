@@ -1,0 +1,53 @@
+# DeepView / Google Immersive dataset registry.
+# Raw source fetched to the user's own machine (per-scene URLs); never re-hosted (redistribute:false).
+# Provided models.json fisheye calibration -> canonical fisheye_opencv; COLMAP only seeds the cloud.
+# eval cam 1 = camera_0001, the centre camera held out by HyperReel/NeRFPlayer/STGS; they score the fisheye
+# (native) images at 1280x960 on 50-frame segments.
+dataset: deepview
+license:
+  redistribute: false
+  source: "Google Immersive / DeepView Video (research)"
+source_url: "https://storage.googleapis.com/deepview_video_raw_data"
+scenes:
+  welder:
+    source_subdir: 01_Welder
+    fps: 30
+    eval_cams: [1]
+    variants: [native, undistorted]
+    scales: [2]  # half; base is always full-res, variants derived at each
+  flames:
+    source_subdir: 02_Flames
+    fps: 30
+    eval_cams: [1]
+    variants: [native, undistorted]
+    scales: [2]  # half; base is always full-res, variants derived at each
+  truck:
+    source_subdir: 04_Truck
+    fps: 30
+    eval_cams: [1]
+    variants: [native, undistorted]
+    scales: [2]  # half; base is always full-res, variants derived at each
+  exhibit:
+    source_subdir: 09_Alexa_Meade_Exhibit
+    fps: 30
+    eval_cams: [1]
+    variants: [native, undistorted]
+    scales: [2]  # half; base is always full-res, variants derived at each
+  face_paint_1:
+    source_subdir: 10_Alexa_Meade_Face_Paint_1
+    fps: 30
+    eval_cams: [1]
+    variants: [native, undistorted]
+    scales: [2]  # half; base is always full-res, variants derived at each
+  face_paint_2:
+    source_subdir: 11_Alexa_Meade_Face_Paint_2
+    fps: 30
+    eval_cams: [1]
+    variants: [native, undistorted]
+    scales: [2]  # half; base is always full-res, variants derived at each
+  cave:
+    source_subdir: 12_Cave
+    fps: 30
+    eval_cams: [1]
+    variants: [native, undistorted]
+    scales: [2]  # half; base is always full-res, variants derived at each

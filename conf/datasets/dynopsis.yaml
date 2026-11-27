@@ -1,0 +1,40 @@
+# Dynopsis: the paper's own path-traced multi-lens scene, hosted on Hugging Face (CC BY 4.0).
+# Ships prepared as one tar per set (<source_subdir>.tar): `download` is the only stage and unpacks it to
+# <dest>/scene1/<set>/count_32, ready to train.
+# One registry scene per image set of scene1. variants is empty (nothing to build); fps and eval_cams describe the data.
+dataset: dynopsis
+license:
+  redistribute: true
+  source: "sascha-kirch/dynopsis (CC BY 4.0)"
+source_url: "sascha-kirch/dynopsis"
+scenes:
+  opencv:
+    source_subdir: scene1/opencv
+    fps: 24
+    eval_cams: [10, 42]
+    variants: []
+  opencv_pinhole:
+    source_subdir: scene1/opencv_pinhole
+    fps: 24
+    eval_cams: [10, 42]
+    variants: []
+  pinhole:
+    source_subdir: scene1/pinhole
+    fps: 24
+    eval_cams: [10, 42]
+    variants: []
+  fisheye_kb:
+    source_subdir: scene1/fisheye_kb
+    fps: 24
+    eval_cams: [10, 42]
+    variants: []
+  fisheye_kb_pinhole:
+    source_subdir: scene1/fisheye_kb_pinhole
+    fps: 24
+    eval_cams: [10, 42]
+    variants: []
+  rotated_gt:  # eval only: the held-out KB cameras rotated about their centres (ids in its index.json)
+    source_subdir: scene1/rotated_gt
+    fps: 24
+    eval_cams: [10, 42]
+    variants: []

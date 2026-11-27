@@ -1,0 +1,87 @@
+# SelfCap (EasyVolcap / LongVolcap) dataset registry.
+# Raw source fetched to the user's own machine (HuggingFace); never re-hosted (redistribute:false).
+# Ships its own calibration + dense cloud, so no COLMAP; start/end trim the setup/teardown range.
+# hair ships its calibration as a separate sibling release -> calib_dir (relative to --source-root).
+# bike/corgi/dance: our own ranges. ftgs_*: the FreeTimeGS test protocol from the HF dataset card
+# (frames [start,end) at 60 fps, test cam, 0.5x except bike). The card's "dance" is hair-release.
+# The paper's dance_3/dance_4 have no published frames/cam and are not listed.
+dataset: selfcap
+license:
+  redistribute: false
+  source: "zju3dv/SelfCap-Dataset (non-commercial research)"
+source_url: "zju3dv/SelfCap-Dataset"
+scenes:
+  bike:
+    source_subdir: bike-release
+    fps: 30
+    eval_cams: [7]
+    start_frame: 29280
+    end_frame: 30360
+    variants: [native, undistorted]
+    scales: [1]  # full; base is always full-res, variants derived at each
+  corgi:
+    source_subdir: corgi-release
+    fps: 30
+    eval_cams: [7]
+    start_frame: 0
+    end_frame: 1200
+    variants: [native, undistorted]
+    scales: [2]  # half; base is always full-res, variants derived at each
+  dance:
+    source_subdir: dance-release
+    fps: 30
+    eval_cams: [7]
+    start_frame: 600
+    end_frame: 1800
+    variants: [native, undistorted]
+    scales: [2]  # half; base is always full-res, variants derived at each
+  ftgs_dance1:
+    source_subdir: hair-release
+    calib_dir: hair-calib
+    fps: 60
+    eval_cams: [15]
+    start_frame: 4120
+    end_frame: 4180
+    variants: [native, undistorted]
+    scales: [2]
+  ftgs_dance2:
+    source_subdir: hair-release
+    calib_dir: hair-calib
+    fps: 60
+    eval_cams: [15]
+    start_frame: 5530
+    end_frame: 5590
+    variants: [native, undistorted]
+    scales: [2]
+  ftgs_corgi1:
+    source_subdir: corgi-release
+    fps: 60
+    eval_cams: [7]
+    start_frame: 200
+    end_frame: 260
+    variants: [native, undistorted]
+    scales: [2]
+  ftgs_corgi2:
+    source_subdir: corgi-release
+    fps: 60
+    eval_cams: [7]
+    start_frame: 2950
+    end_frame: 3010
+    variants: [native, undistorted]
+    scales: [2]
+  ftgs_bike1:
+    source_subdir: bike-release
+    fps: 60
+    eval_cams: [9]
+    start_frame: 8900
+    end_frame: 8960
+    variants: [native, undistorted]
+    scales: [1]
+  ftgs_bike2:
+    source_subdir: bike-release
+    fps: 60
+    eval_cams: [9]
+    start_frame: 30020
+    end_frame: 30080
+    variants: [native, undistorted]
+    scales: [1]

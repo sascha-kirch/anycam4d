@@ -1,0 +1,7 @@
+# AnyCam4D: native-lens data, rendered by ray casting through the lens (unscented-transform projection).
+# Densification: `recipe=og_4dgs|mcmc_spatial|default_spatial|null_4dgs`.
+defaults:
+  - base
+  - recipe: og_4dgs
+  - rendering: anycam4d
+  - _self_

@@ -1,0 +1,23 @@
+# @package _global_
+# Gradient-driven spatial densification; temporal parameters are never mutated.
+# Training as in base.yaml, without regularizers: this family prunes instead. After refine_stop_iter nothing prunes or
+# resets, so long runs can degrade after the peak; best.pt keeps the best eval step.
+strategy:
+  type: default_spatial
+
+  grow_grad2d: 0.0002
+  grow_scale3d: 0.01
+  prune_opa: 0.005
+  prune_scale3d: 0.1
+  refine_start_iter: 500
+  refine_stop_iter: 15_000
+  refine_every: 100
+  reset_every: 3_000
+
+  # Safety ceiling, not a budget: a healthy gradient-driven run never reaches it. 0 disables.
+  cap_max: 3_000_000
+
+  spatial_trigger: paramspace  # paramspace (any backend) | screenspace (EWA only)
+  grad3d_threshold: 0.0002  # paramspace: |dL/dmu| * camera distance / 2 (3DGRUT, 3DGS value)
+
+  verbose: false

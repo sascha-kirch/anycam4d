@@ -1,0 +1,38 @@
+BasedOnStyle: LLVM
+Language: Cpp
+
+# --- Indentation ---
+IndentWidth: 4
+ContinuationIndentWidth: 4
+UseTab: Never
+NamespaceIndentation: All
+
+# --- Line length & wrapping ---
+ColumnLimit: 120
+AllowAllParametersOfDeclarationOnNextLine: false
+AlignAfterOpenBracket: BlockIndent #Align
+BinPackArguments: false
+BinPackParameters: false
+AllowShortEnumsOnASingleLine: false
+AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: None
+
+# --- Braces & control flow ---
+BreakBeforeBraces: Stroustrup
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowAllArgumentsOnNextLine: false
+
+# --- Alignment ---
+PointerAlignment: Left
+AlignOperands: Align
+
+# --- Includes ---
+SortIncludes: true
+IncludeBlocks: Preserve
+
+# --- Misc ---
+Standard: Latest
+SpacesBeforeTrailingComments: 1
+FixNamespaceComments: true

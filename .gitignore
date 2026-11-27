@@ -1,0 +1,11 @@
+# Environment and build
+.pixi/
+__pycache__/
+*.egg-info/
+build/
+
+# Data and outputs
+/data/
+/runs/
+/results/
+/outputs/

@@ -1,0 +1,10 @@
+# Ray backend: lens projection by the unscented transform, ray-Gaussian evaluation in world space.
+backend: anycam4d
+near_plane: 0.01
+far_plane: 1.0e10
+eps2d: 0.3
+packed: true
+render_mode: RGB
+rasterize_mode: classic  # only mode this backend builds; antialiased is rejected (ray backend)
+post_processor: none  # none | bilateral_grid
+bilagrid_shape: [16, 16, 8]

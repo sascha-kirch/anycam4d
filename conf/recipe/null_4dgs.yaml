@@ -1,0 +1,16 @@
+# @package _global_
+# Control: no densification; the population stays at its initialization. Thresholds are unused, the
+# schedule is still validated against training.max_steps.
+strategy:
+  type: null_4dgs
+
+  grow_grad2d: 0.0002
+  grow_scale3d: 0.01
+  prune_opa: 0.005
+  prune_scale3d: 0.1
+  refine_start_iter: 500
+  refine_stop_iter: 15_000
+  refine_every: 100
+  reset_every: 3_000
+
+  verbose: false

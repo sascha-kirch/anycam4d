@@ -1,0 +1,35 @@
+[project]
+name = "anycam4d"
+version = "1.0.0"
+description = "Ray-Based 4D Gaussian Rendering for Arbitrary Camera Models"
+authors = [{ name = "Sascha Kirch", email = "skirch1@alumno.uned.es" }]
+requires-python = ">=3.12"
+license = "Apache-2.0"
+
+[project.urls]
+Homepage = "https://sascha-kirch.github.io/anycam4d/"
+Repository = "https://github.com/sascha-kirch/anycam4d"
+Paper = "https://arxiv.org/abs/2611.34223"
+Dataset = "https://huggingface.co/datasets/sascha-kirch/dynopsis"
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["anycam4d"]
+
+[tool.pytest.ini_options]
+# `bench` marks the manual, non-gating performance benchmark; it is excluded from the default
+# suite (`pixi run test`) and run explicitly with `pytest tests/bench_numerics.py -m bench -s`.
+markers = [
+    "bench: manual, non-gating performance benchmark (run with -m bench)",
+    "slow: heavy end-to-end test (e.g. real COLMAP SfM); excluded by default, run with -m slow",
+]
+addopts = "-m 'not bench and not slow'"
+filterwarnings = [
+    # torch 2.10's own DataLoader pin-memory thread passes the deprecated `device` argument.
+    "ignore:The argument 'device' of Tensor.:DeprecationWarning:torch.utils.data._utils.pin_memory",
+    # DataLoader workers fork the multi-threaded test process; training uses the same start method.
+    "ignore:This process .* is multi-threaded, use of fork:DeprecationWarning",
+]

@@ -1,0 +1,10 @@
+# EWA splatting (gsplat rasterization settings).
+backend: ewa
+near_plane: 0.01
+far_plane: 1.0e10
+eps2d: 0.3
+packed: true
+render_mode: RGB
+rasterize_mode: classic # classic | antialiased
+post_processor: none  # none | bilateral_grid
+bilagrid_shape: [16, 16, 8]  # (grid_X, grid_Y, grid_W)
